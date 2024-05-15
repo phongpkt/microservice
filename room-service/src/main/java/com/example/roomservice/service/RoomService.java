@@ -37,7 +37,7 @@ public class RoomService {
 
         if (room.isPresent()){
             ResponseEntity<hotelDTO> responseEntity = restTemplate
-                    .getForEntity("http://localhost:8081/api/hotel/find/" + room.get().getHotel(),
+                    .getForEntity("lb:hotel-service" + room.get().getHotel(),
                             hotelDTO.class);
             hotelDTO hotel = responseEntity.getBody();
 
