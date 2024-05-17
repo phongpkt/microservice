@@ -4,3 +4,8 @@ server:
 spring:
   profiles:
     active: native
+  cloud:
+    config:
+      enabled: false
+      server:
+        bootstrap: false

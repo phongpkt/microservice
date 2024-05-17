@@ -1,0 +1,70 @@
+version: '3.8'
+
+networks:
+  db-network:
+    driver: bridge
+
+services:
+  mysql_hotel:
+    image: mysql:latest
+    restart: always
+    container_name: mysql-hotel
+    networks:
+      - db-network
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: hotel_service
+    ports:
+      - "3306:3306"
+
+#  mysql_auth:
+#    image: mysql:latest
+#    restart: always
+#    container_name: mysql-auth
+#    networks:
+#      - db-network
+#    environment:
+#      MYSQL_ROOT_PASSWORD: 1234
+#      MYSQL_DATABASE: auth_service
+#    ports:
+#      - "3307:3306"
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8060:8060"
+    depends_on:
+      - auth-service
+      - config-server
+      - hotel-service
+      - service-registry
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  auth-service:
+    build: ./auth-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+#    depends_on:
+#      - mysql_auth
+
+  config-server:
+    build: ./config-server
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  hotel-service:
+    build: ./hotel-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - mysql_hotel
+
+  service-registry:
+    build: ./service-registry
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_REGISTERWITHEUREKA=false
+      - EUREKA_CLIENT_FETCHREGISTRY=false

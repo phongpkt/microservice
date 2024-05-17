@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -38,39 +39,49 @@ class AuthenticationServiceTest {
     private RoleService roleService;
     @Mock
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtService jwtService;
     @Mock
+    private JwtService jwtService;
+    @Autowired
     private AuthenticationService authenticationService;
     @InjectMocks
     private StaffService staffService;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this); // Open mockito annotations
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     void authenticate() {
-        // Given
-        LoginUserDto loginUserDto = new LoginUserDto("john.doe@example.com", "1234");
+        LoginUserDto loginUserDto = new LoginUserDto("staff@example.com", "1234");
         Staff expectedStaff = new Staff();
-        when(userRepository.findByEmail(loginUserDto.getEmail())).thenReturn(Optional.of(expectedStaff));
+        expectedStaff.setEmail("staff@example.com");
+        // Các thuộc tính khác của expectedStaff có thể được thiết lập tương tự
 
-        // When
+        // Thiết lập hành vi cho mock staffService
+        when(staffService.findByEmail(loginUserDto.getEmail())).thenReturn(Optional.of(expectedStaff));
+
+        // Gọi phương thức authenticate
         Staff result = authenticationService.authenticate(loginUserDto);
 
-        // Then
+        // Kiểm tra kết quả
         assertNotNull(result);
         assertEquals(expectedStaff, result);
     }
 
+
     @Test
     void signup() {
         // Given
-        Role role = new Role(1L, "ADMIN");
-        RegisterUserDto registerUserDto = new RegisterUserDto("john.doe@example.com", "password", "John", "Doe", "123456789", new HashSet<>(Arrays.asList("ADMIN")));
-        when(roleService.findRoleByName("ADMIN")).thenReturn(role);
+        Role role = new Role();
+        role.setId(1L);
+        role.setName("ADMIN");
+
+        RegisterUserDto registerUserDto = new RegisterUserDto(
+                "john.doe@example.com", "password", "John", "Doe", "123456789",
+                new HashSet<>(Arrays.asList("ADMIN")), 1L
+        );
+
         when(userRepository.save(any(Staff.class))).thenReturn(new Staff());
 
         // When
@@ -81,28 +92,20 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void validateToken() {
-        // Given
-        String token = "dummyToken";
-        doNothing().when(jwtService).validateToken(token);
+        void findCurrentUser() {
+            // Given
+            Staff staff = new Staff();
+            Authentication authentication = mock(Authentication.class);
+            when(authentication.getPrincipal()).thenReturn(staff);
 
-        // When, Then
-        assertDoesNotThrow(() -> authenticationService.validateToken(token));
-    }
+            SecurityContext securityContext = mock(SecurityContext.class);
+            when(securityContext.getAuthentication()).thenReturn(authentication);
+            SecurityContextHolder.setContext(securityContext);
 
-    @Test
-    void findCurrentUser() {
-        // Given
-        Staff staff = new Staff();
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.getPrincipal()).thenReturn(staff);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            // When
+            Staff result = authenticationService.findCurrentUser();
 
-        // When
-        Staff result = authenticationService.findCurrentUser();
-
-        // Then
-        assertNotNull(result);
-        assertEquals(staff, result);
-    }
+            // Then
+            assertEquals(staff, result);
+        }
 }

@@ -19,13 +19,4 @@ public class RegisterUserDto {
     private String phone;
     private Set<String> rolesName;
     private Long hotel_id;
-
-    public RegisterUserDto(String email, String password, String firstName, String lastName, String phone, Set<String> rolesName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.phone = phone;
-        this.rolesName = rolesName;
-    }
 }

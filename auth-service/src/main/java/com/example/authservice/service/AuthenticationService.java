@@ -5,6 +5,9 @@ import com.example.authservice.dto.RegisterUserDto;
 import com.example.authservice.model.Role;
 import com.example.authservice.model.Staff;
 import com.example.authservice.repository.StaffRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +30,8 @@ public class AuthenticationService {
     private JwtService jwtService;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public Staff authenticate(LoginUserDto input) {
         authenticationManager.authenticate(
@@ -39,6 +44,7 @@ public class AuthenticationService {
                 .orElseThrow();
     }
 
+    @Transactional
     public Staff signup(RegisterUserDto request) {
         try {
             Staff user = new Staff();
@@ -55,20 +61,19 @@ public class AuthenticationService {
                 for (String roleName : request.getRolesName()) {
                     Role existingRole = roleService.findRoleByName(roleName);
                     if (existingRole != null) {
+                        existingRole = entityManager.merge(existingRole);
                         user.getRoles().add(existingRole);
                     }
                 }
             }
-            return userRepository.save(user);
+            return entityManager.merge(user);
+//            return userRepository.save(user);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public void validateToken(String token) {
-        jwtService.validateToken(token);
-    }
     public Staff findCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             return (Staff) authentication.getPrincipal();

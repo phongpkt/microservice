@@ -1,40 +1,57 @@
 package com.example.authservice.repository;
 
 import com.example.authservice.model.Role;
+import com.example.authservice.service.RoleService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class RoleRepositoryTest {
-    @Autowired
+
+    @Mock
     private RoleRepository roleRepository;
 
+    @InjectMocks
+    private RoleService roleService;
+
     @Test
-    public void testFindRoleByName() {
-        // Given
-        Role role = new Role();
-        role.setName("ADMIN");
-        roleRepository.save(role);
+    void findRoleByName_WhenRoleExists() {
+        // Arrange
+        String roleName = "ADMIN";
+        Role mockRole = new Role(1L, "ADMIN");
 
-        // When
-        Role foundRole = roleRepository.findRoleByName("ADMIN");
+        // Mock the behavior of the roleRepository
+        when(roleRepository.findRoleByName(roleName)).thenReturn(mockRole);
 
-        // Then
-        assertNotNull(foundRole);
-        assertEquals("ADMIN", foundRole.getName());
+        // Act
+        Role foundRole = roleService.findRoleByName(roleName);
+
+        // Assert
+        assertEquals(mockRole, foundRole);
     }
 
     @Test
-    public void testFindRoleByName_NotFound() {
-        // When
-        Role foundRole = roleRepository.findRoleByName("NON_EXISTENT_ROLE");
+    void findRoleByName_WhenRoleDoesNotExist() {
+        // Arrange
+        String roleName = "NON_EXISTING_ROLE";
 
-        // Then
-        assertNull(foundRole);
+        // Mock the behavior of the roleRepository
+        when(roleRepository.findRoleByName(roleName)).thenReturn(null);
+
+        // Act
+        Role foundRole = roleRepository.findRoleByName(roleName);
+
+        // Assert
+        assertEquals(null, foundRole);
     }
 }

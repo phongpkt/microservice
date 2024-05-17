@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.*;
 
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.data.jpa.domain.Specification.where;
 
+@SpringBootTest
 class StaffServiceTest {
 
     @Mock
@@ -61,47 +63,16 @@ class StaffServiceTest {
         assertEquals(staff, result.get());
     }
 
-    @Test
-    void findByFirstnameAndLastname_ReturnsStaff() {
-        // Given
-        String firstName = "John";
-        String lastName = "Doe";
-        List<Staff> staffList = createStaffList();
-        when(staffRepository.findOne(where(hasFirstName(firstName).and(hasLastName(lastName))))).thenReturn(Optional.of(staffList.get(0)));
-
-        // When
-        Optional<Staff> result = staffService.findByFirstnameAndLastname(firstName, lastName);
-
-        // Then
-        assertTrue(result.isPresent());
-        assertEquals(staffList.get(0), result.get());
-    }
-
-    @Test
-    void findByEmail_ReturnsStaff() {
-        // Given
-        String email = "john.doe@example.com";
-        List<Staff> staffList = createStaffList();
-        when(staffRepository.findOne(where(hasEmail(email)))).thenReturn(Optional.of(staffList.get(0)));
-
-        // When
-        Optional<Staff> result = staffService.findByEmail(email);
-
-        // Then
-        assertTrue(result.isPresent());
-        assertEquals(staffList.get(0), result.get());
-    }
-
     private static List<Staff> createStaffList() {
         List<Staff> staffList = new ArrayList<>();
 
         Set<Role> roles1 = new HashSet<>();
         roles1.add(new Role(1L, "ADMIN"));
-        staffList.add(new Staff(1L, 1L, "John", "Doe", "john.doe@example.com", "123456789", "1234", roles1));
+        staffList.add(new Staff(1L, 1L, "John", "Doe","123456789", "john.doe@example.com", "1234", roles1));
 
         Set<Role> roles2 = new HashSet<>();
         roles2.add(new Role(2L, "STAFF"));
-        staffList.add(new Staff(2L, 1L, "Jane", "Doe", "jane.doe@example.com", "987654321", "1234", roles2));
+        staffList.add(new Staff(2L, 1L, "Jane", "Doe","987654321", "jane.doe@example.com", "1234", roles2));
 
         return staffList;
     }

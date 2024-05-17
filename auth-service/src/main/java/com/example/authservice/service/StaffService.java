@@ -25,12 +25,15 @@ public class StaffService {
     public Optional<Staff> findById(Long id) {
         return staffRepository.findById(id);
     }
+
     public Optional<Staff> findByFirstnameAndLastname(String firstName, String lastName) {
         return staffRepository.findOne(where(hasFirstName(firstName).and(hasLastName(lastName))));
     }
+
     public Optional<Staff> findByEmail(String email) {
         return staffRepository.findOne(where(hasEmail(email)));
     }
+
     public Optional<Staff> findByPhone(String phone) {
         return staffRepository.findOne(where(hasPhone(phone)));
     }

@@ -4,9 +4,8 @@ import com.example.authservice.model.Staff;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,13 +22,8 @@ public class JwtServiceTest {
     @Mock
     private Staff userDetails;
 
-    @InjectMocks
+    @Autowired
     private JwtService jwtService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     public void testGenerateToken() {
@@ -60,7 +54,14 @@ public class JwtServiceTest {
     public void testExtractUsername() {
         // Given
         String email = "john.doe@example.com";
-        String token = jwtService.generateToken(new HashMap<>(), userDetails);
+        String firstName = "John";
+        String lastName = "Doe";
+        when(userDetails.getEmail()).thenReturn(email);
+        when(userDetails.getFirstName()).thenReturn(firstName);
+        when(userDetails.getLastName()).thenReturn(lastName);
+
+        // When
+        String token = jwtService.generateToken(userDetails);
 
         // When
         String extractedEmail = jwtService.extractUsername(token);

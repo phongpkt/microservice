@@ -1,6 +1,5 @@
 package com.example.authservice.model;
 
-import com.example.authservice.enums.StaffRole;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -46,7 +45,7 @@ public class Staff implements UserDetails {
         this.email = email;
         this.phone = phone;
         this.password = password;
-        this.roles = roles;
+        this.roles = this.roles;
     }
 
     @Override
@@ -57,6 +56,19 @@ public class Staff implements UserDetails {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
         return authorities;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Staff staff = (Staff) o;
+        return Objects.equals(email, staff.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email);
     }
 
     @Override
