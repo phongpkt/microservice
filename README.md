@@ -2,6 +2,9 @@
 
 ## Overview
 This project is a microservice-based architecture application utilizing Eureka Server, JUnit Test, Mockito, and Docker. The project follows the Model-Controller-Service pattern to ensure separation of concerns and enhance maintainability.
+<br>
+<br>
+***The app doesn't have a front-end so use Postman to run the api***
 
 ## Technologies Used
 - **Eureka Server**: Service discovery for microservices.
